@@ -8,7 +8,8 @@ import {
   Scripts,
   type ErrorComponentProps,
 } from "@tanstack/react-router";
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
+import { Sidebar } from "@/components/Sidebar";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -78,20 +79,16 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Lovable App" },
-      { name: "description", content: "Lovable Generated Project" },
-      { name: "author", content: "Lovable" },
-      { property: "og:title", content: "Lovable App" },
-      { property: "og:description", content: "Lovable Generated Project" },
+      { title: "estuda.dev" },
+      { name: "description", content: "Estude HTML, CSS e JavaScript com editor interativo." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:site", content: "@Lovable" },
     ],
     links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
+      { rel: "preconnect", href: "https://fonts.googleapis.com" },
+      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
+      { rel: "stylesheet", href: "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" },
+      { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
   }),
@@ -103,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="pt-BR">
       <head>
         <HeadContent />
       </head>
@@ -117,11 +114,34 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const [open, setOpen] = useState(false);
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
+      <div className="flex items-center justify-between border-b border-border bg-sidebar px-4 py-3 md:hidden">
+        <span className="font-mono font-bold text-primary">&lt;estuda.dev /&gt;</span>
+        <button className="btn btn-ghost" aria-label="Abrir menu" aria-expanded={open} onClick={() => setOpen(true)}>
+          ☰
+        </button>
+      </div>
+      <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-border bg-sidebar md:block">
+        <Sidebar />
+      </aside>
+      {open && (
+        <div className="fixed inset-0 z-50 md:hidden" role="dialog" aria-modal="true" aria-label="Menu">
+          <button className="absolute inset-0 bg-background/80" aria-label="Fechar menu" onClick={() => setOpen(false)} />
+          <div className="absolute inset-y-0 left-0 w-[85%] max-w-xs border-r border-border bg-sidebar">
+            <button className="btn btn-ghost absolute right-2 top-2" aria-label="Fechar menu" onClick={() => setOpen(false)}>✕</button>
+            <Sidebar onNavigate={() => setOpen(false)} />
+          </div>
+        </div>
+      )}
+      <main id="conteudo" className="min-w-0 px-4 py-8 md:ml-72 md:px-10">
+        <div className="mx-auto max-w-5xl">
+          <Outlet />
+        </div>
+      </main>
     </QueryClientProvider>
   );
 }

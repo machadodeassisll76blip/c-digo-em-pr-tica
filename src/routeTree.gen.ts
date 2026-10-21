@@ -10,33 +10,91 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CssRouteImport } from './routes/css'
+import { Route as HtmlRouteImport } from './routes/html'
+import { Route as JavascriptRouteImport } from './routes/javascript'
+import { Route as ProjetosRouteImport } from './routes/projetos'
+import { Route as AulaLangSlugRouteImport } from './routes/aula.$lang.$slug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CssRoute = CssRouteImport.update({
+  id: '/css',
+  path: '/css',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HtmlRoute = HtmlRouteImport.update({
+  id: '/html',
+  path: '/html',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const JavascriptRoute = JavascriptRouteImport.update({
+  id: '/javascript',
+  path: '/javascript',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProjetosRoute = ProjetosRouteImport.update({
+  id: '/projetos',
+  path: '/projetos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AulaLangSlugRoute = AulaLangSlugRouteImport.update({
+  id: '/aula/$lang/$slug',
+  path: '/aula/$lang/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/css': typeof CssRoute
+  '/html': typeof HtmlRoute
+  '/javascript': typeof JavascriptRoute
+  '/projetos': typeof ProjetosRoute
+  '/aula/$lang/$slug': typeof AulaLangSlugRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/css': typeof CssRoute
+  '/html': typeof HtmlRoute
+  '/javascript': typeof JavascriptRoute
+  '/projetos': typeof ProjetosRoute
+  '/aula/$lang/$slug': typeof AulaLangSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/css': typeof CssRoute
+  '/html': typeof HtmlRoute
+  '/javascript': typeof JavascriptRoute
+  '/projetos': typeof ProjetosRoute
+  '/aula/$lang/$slug': typeof AulaLangSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    '/' | '/css' | '/html' | '/javascript' | '/projetos' | '/aula/$lang/$slug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/css' | '/html' | '/javascript' | '/projetos' | '/aula/$lang/$slug'
+  id:
+    | '__root__'
+    | '/'
+    | '/css'
+    | '/html'
+    | '/javascript'
+    | '/projetos'
+    | '/aula/$lang/$slug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CssRoute: typeof CssRoute
+  HtmlRoute: typeof HtmlRoute
+  JavascriptRoute: typeof JavascriptRoute
+  ProjetosRoute: typeof ProjetosRoute
+  AulaLangSlugRoute: typeof AulaLangSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +106,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/css': {
+      id: '/css'
+      path: '/css'
+      fullPath: '/css'
+      preLoaderRoute: typeof CssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/html': {
+      id: '/html'
+      path: '/html'
+      fullPath: '/html'
+      preLoaderRoute: typeof HtmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/javascript': {
+      id: '/javascript'
+      path: '/javascript'
+      fullPath: '/javascript'
+      preLoaderRoute: typeof JavascriptRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/projetos': {
+      id: '/projetos'
+      path: '/projetos'
+      fullPath: '/projetos'
+      preLoaderRoute: typeof ProjetosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/aula/$lang/$slug': {
+      id: '/aula/$lang/$slug'
+      path: '/aula/$lang/$slug'
+      fullPath: '/aula/$lang/$slug'
+      preLoaderRoute: typeof AulaLangSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CssRoute: CssRoute,
+  HtmlRoute: HtmlRoute,
+  JavascriptRoute: JavascriptRoute,
+  ProjetosRoute: ProjetosRoute,
+  AulaLangSlugRoute: AulaLangSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
