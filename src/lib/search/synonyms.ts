@@ -1,0 +1,37 @@
+/**
+ * Dicionário de sinônimos. Chave = termo que o usuário pode digitar (sem acento).
+ * Valor = termos que existem no conteúdo das lições. Para ampliar, adicione linhas.
+ */
+export const synonyms: Record<string, string[]> = {
+  centralizar: ["flexbox", "grid", "justify-content", "align-items", "center"],
+  centro: ["flexbox", "grid", "center"],
+  alinhar: ["flexbox", "grid", "align-items"],
+  menu: ["nav", "navegacao", "media queries", "flexbox"],
+  navegacao: ["nav", "menu", "link"],
+  responsivo: ["media queries", "grid", "flexbox"],
+  celular: ["media queries", "responsivo"],
+  "salvar dados": ["localstorage", "json"],
+  salvar: ["localstorage", "json"],
+  guardar: ["localstorage"],
+  clicar: ["eventos", "addeventlistener", "click"],
+  clique: ["eventos", "addeventlistener", "click"],
+  botao: ["button", "eventos", "formularios"],
+  cor: ["cores", "color", "variaveis css", "background"],
+  cores: ["color", "variaveis css"],
+  animar: ["transicoes", "animacoes", "transition", "keyframes"],
+  repetir: ["lacos", "for", "while"],
+  loop: ["lacos", "for"],
+  lista: ["listas", "ul", "array"],
+  tabela: ["tabelas", "table"],
+  imagem: ["img", "links imagens"],
+  foto: ["img"],
+  formulario: ["form", "input", "formularios"],
+  api: ["fetch", "json", "async"],
+  requisicao: ["fetch", "async await"],
+  esperar: ["async", "await", "promise"],
+  se: ["condicionais", "if"],
+  condicao: ["condicionais", "if", "else"],
+  espaco: ["box model", "margin", "padding"],
+  borda: ["box model", "border"],
+  fixar: ["posicionamento", "position", "fixed", "sticky"],
+};

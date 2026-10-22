@@ -10,6 +10,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, useState, type ReactNode } from "react";
 import { Sidebar } from "@/components/Sidebar";
+import { SearchBar } from "@/components/search/SearchBar";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
@@ -121,9 +122,15 @@ function RootComponent() {
       <a href="#conteudo" className="skip-link">Pular para o conteúdo</a>
       <div className="flex items-center justify-between border-b border-border bg-sidebar px-4 py-3 md:hidden">
         <span className="font-mono font-bold text-primary">&lt;estuda.dev /&gt;</span>
-        <button className="btn btn-ghost" aria-label="Abrir menu" aria-expanded={open} onClick={() => setOpen(true)}>
-          ☰
-        </button>
+        <div className="flex gap-2">
+          <SearchBar />
+          <button className="btn btn-ghost" aria-label="Abrir menu" aria-expanded={open} onClick={() => setOpen(true)}>
+            ☰
+          </button>
+        </div>
+      </div>
+      <div className="sticky top-0 z-40 hidden border-b border-border bg-background/90 px-10 py-3 backdrop-blur md:ml-72 md:block">
+        <div className="mx-auto max-w-5xl"><SearchBar /></div>
       </div>
       <aside className="fixed inset-y-0 left-0 hidden w-72 border-r border-border bg-sidebar md:block">
         <Sidebar />

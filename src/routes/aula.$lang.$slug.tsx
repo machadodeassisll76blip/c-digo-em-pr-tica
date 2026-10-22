@@ -30,7 +30,7 @@ export const Route = createFileRoute("/aula/$lang/$slug")({
 function Aula() {
   const { langId, idx } = Route.useLoaderData();
   const lang = getLanguage(langId)!;
-  const lesson = lang.lessons[idx];
+  const lesson = lang.lessons[idx]!;
   const prev = lang.lessons[idx - 1];
   const next = lang.lessons[idx + 1];
   const { isDone, toggle } = useProgress();
