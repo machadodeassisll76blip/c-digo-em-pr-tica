@@ -25,6 +25,9 @@ export interface SearchResult { doc: SearchDoc; score: number; snippet: string; 
 export const normalize = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 
+/** Normaliza preservando o comprimento (para destacar trechos). */
+const normKeep = (s: string) => [...s].map((c) => normalize(c)[0] ?? c).join("");
+
 const words = (s: string) => normalize(s).split(/[^a-z0-9]+/).filter((w) => w.length > 1);
 
 let cache: SearchDoc[] | null = null;
@@ -99,7 +102,7 @@ function docWords(d: SearchDoc, k: string, text: string) {
 
 function makeSnippet(text: string, matched: string): string {
   const flat = text.replace(/\s+/g, " ");
-  const i = normalize(flat).indexOf(matched);
+  const i = normKeep(flat).indexOf(matched);
   if (i < 0) return flat.slice(0, 110);
   const start = Math.max(0, i - 40);
   return (start > 0 ? "…" : "") + flat.slice(start, start + 120) + (start + 120 < flat.length ? "…" : "");
@@ -147,7 +150,7 @@ export function suggest(q: string, n = 5): string[] {
 export function highlight(snippet: string, q: string): { text: string; hit: boolean }[] {
   const { terms, extra } = expandQuery(q);
   const ts = [...terms, ...extra].filter((t) => t.length > 1);
-  const norm = normalize(snippet);
+  const norm = normKeep(snippet);
   const marks = new Array(snippet.length).fill(false);
   for (const t of ts) {
     let i = norm.indexOf(t);

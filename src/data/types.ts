@@ -12,6 +12,8 @@ export interface Lesson {
   summary: string;
   /** Parágrafos curtos de explicação. */
   explanation: string[];
+  /** Palavras-chave extras para a busca. */
+  tags?: string[];
   code: CodeSet;
 }
 
@@ -28,5 +30,7 @@ export interface Project {
   title: string;
   summary: string;
   explanation: string[];
+  /** Palavras-chave extras para a busca. */
+  tags?: string[];
   code: CodeSet;
 }
