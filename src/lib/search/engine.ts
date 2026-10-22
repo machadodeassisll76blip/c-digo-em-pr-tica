@@ -118,6 +118,7 @@ export function search(q: string, limit = 30): SearchResult[] {
     for (const { t, boost } of all) {
       let termBest = 0;
       for (const f of FIELDS) {
+        if (boost < 1 && f.w < 5) continue; // sinônimos só valem em título, tags e resumo
         const text = fieldText(d, f.key);
         for (const w of docWords(d, f.key, text)) {
           const m = (boost === 1 ? termMatch(t, w) : w === t || w.startsWith(t) ? 1 : 0) * f.w * boost;
