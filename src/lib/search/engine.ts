@@ -120,7 +120,7 @@ export function search(q: string, limit = 30): SearchResult[] {
       for (const f of FIELDS) {
         const text = fieldText(d, f.key);
         for (const w of docWords(d, f.key, text)) {
-          const m = termMatch(t, w) * f.w * boost;
+          const m = (boost === 1 ? termMatch(t, w) : w === t || w.startsWith(t) ? 1 : 0) * f.w * boost;
           if (m > termBest) termBest = m;
           if (m > best.s) best = { s: m, field: f.key, word: w, text };
         }
@@ -133,7 +133,9 @@ export function search(q: string, limit = 30): SearchResult[] {
       out.push({ doc: d, score, field: best.field, snippet: best.field === "tags" ? d.summary : makeSnippet(best.text, best.word) });
     }
   }
-  return out.sort((a, b) => b.score - a.score).slice(0, limit);
+  out.sort((a, b) => b.score - a.score);
+  const top = out[0]?.score ?? 0;
+  return out.filter((r) => r.score >= top * 0.25).slice(0, limit);
 }
 
 /** Termos parecidos para "Você quis dizer…". */
