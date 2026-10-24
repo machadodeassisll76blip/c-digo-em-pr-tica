@@ -2,7 +2,9 @@ import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { groupLabels, highlight, search, suggest, type GroupId, type SearchResult } from "@/lib/search/engine";
 
-const ORDER: GroupId[] = ["html", "css", "javascript", "projetos"];
+const ORDER: GroupId[] = ["html", "css", "javascript", "projetos", "dicionario"];
+/** Quantos verbetes do dicionário aparecem na busca global (o resto fica na página do Dicionário). */
+const DICTIONARY_LIMIT = 8;
 
 /**
  * Painel de busca. `aside` é um espaço reservado para, no futuro,
@@ -15,13 +17,14 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
   const listId = useId();
   const navigate = useNavigate();
 
-  const results = useMemo(() => search(q), [q]);
+  const results = useMemo(() => search(q, 60), [q]);
   const grouped = useMemo(() => {
     const flat: SearchResult[] = [];
     const groups = ORDER.map((g) => {
-      const items = results.filter((r) => r.doc.group === g);
+      const all = results.filter((r) => r.doc.group === g);
+      const items = g === "dicionario" ? all.slice(0, DICTIONARY_LIMIT) : all;
       flat.push(...items);
-      return { g, items };
+      return { g, items, more: all.length - items.length };
     }).filter((x) => x.items.length);
     return { groups, flat };
   }, [results]);
@@ -40,6 +43,7 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
   const go = (r: SearchResult) => {
     const l = r.doc.link;
     if (l.to === "/projetos") navigate({ to: "/projetos", hash: l.hash });
+    else if (l.to === "/dicionario") navigate({ to: "/dicionario", hash: l.hash });
     else navigate({ to: l.to, params: l.params });
     setQ("");
     onClose();
@@ -60,14 +64,14 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
       <div className="search-panel" onKeyDown={onKey}>
         <div className="flex items-center gap-2 border-b border-border p-3">
           <span aria-hidden className="font-mono text-primary">⌕</span>
-          <label htmlFor={`${listId}-input`} className="sr-only">Buscar lições, projetos e código</label>
+          <label htmlFor={`${listId}-input`} className="sr-only">Buscar lições, projetos, dicionário e código</label>
           <input
             ref={inputRef}
             id={`${listId}-input`}
             type="search"
             value={q}
             onChange={(e) => setQ(e.target.value)}
-            placeholder="Busque: flexbox, centralizar, salvar dados…"
+            placeholder="Busque: flexbox, centralizar, fieldset, salvar dados…"
             className="search-input"
             role="combobox"
             aria-expanded={grouped.flat.length > 0}
@@ -79,7 +83,7 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
         </div>
         <div className="flex min-h-0 flex-1">
           <div id={listId} role="listbox" aria-label="Resultados" className="min-h-0 flex-1 overflow-y-auto p-2">
-            {!q.trim() && <p className="p-4 text-sm text-muted-foreground">Digite para buscar em títulos, explicações e no código dos exemplos. Use ↑ ↓ para navegar e Enter para abrir.</p>}
+            {!q.trim() && <p className="p-4 text-sm text-muted-foreground">Digite para buscar em títulos, explicações, dicionário e no código dos exemplos. Use ↑ ↓ para navegar e Enter para abrir.</p>}
             {q.trim() && !grouped.flat.length && (
               <div className="p-4 text-sm" aria-live="polite">
                 <p>Não encontramos nada para “{q}”. 🤔</p>
@@ -91,7 +95,7 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
                 </div>
               </div>
             )}
-            {grouped.groups.map(({ g, items }) => (
+            {grouped.groups.map(({ g, items, more }) => (
               <div key={g} role="group" aria-label={groupLabels[g]} className="mb-2">
                 <p className="px-3 py-1 font-mono text-xs uppercase text-primary">{groupLabels[g]}</p>
                 {items.map((r) => {
@@ -115,6 +119,7 @@ export function SearchDialog({ open, onClose, aside }: { open: boolean; onClose:
                     </div>
                   );
                 })}
+                {more > 0 && <p className="px-3 py-1 text-xs text-muted-foreground">+ {more} no Dicionário. Refine a busca para ver os outros.</p>}
               </div>
             ))}
             <p className="sr-only" aria-live="polite">{q.trim() ? `${grouped.flat.length} resultados` : ""}</p>

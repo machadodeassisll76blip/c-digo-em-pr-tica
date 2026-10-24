@@ -4,10 +4,21 @@
  * como fonte de contexto (RAG) sem alterar a interface de busca.
  */
 import { languages, projects } from "@/data";
+import { dictionaryEntries } from "@/data/dictionary";
 import { synonyms } from "./synonyms";
 
-export type GroupId = "html" | "css" | "javascript" | "projetos";
-export const groupLabels: Record<GroupId, string> = { html: "HTML", css: "CSS", javascript: "JavaScript", projetos: "Projetos" };
+export type GroupId = "html" | "css" | "javascript" | "projetos" | "dicionario";
+export const groupLabels: Record<GroupId, string> = {
+  html: "HTML",
+  css: "CSS",
+  javascript: "JavaScript",
+  projetos: "Projetos",
+  dicionario: "Dicionário",
+};
+
+/** Identificador do verbete no índice de busca e no HTML da página do dicionário. */
+export const dictionaryDocId = (lang: string, id: string) => `dicionario/${lang}/${id}`;
+export const dictionaryDomId = (lang: string, id: string) => `verbete-${lang}-${id}`;
 
 export interface SearchDoc {
   id: string;
@@ -17,7 +28,10 @@ export interface SearchDoc {
   tags: string[];
   text: string; // explicação
   code: string;
-  link: { to: "/aula/$lang/$slug"; params: { lang: string; slug: string } } | { to: "/projetos"; hash: string };
+  link:
+    | { to: "/aula/$lang/$slug"; params: { lang: string; slug: string } }
+    | { to: "/projetos"; hash: string }
+    | { to: "/dicionario"; hash: string };
 }
 
 export interface SearchResult { doc: SearchDoc; score: number; snippet: string; field: string }
@@ -46,6 +60,19 @@ export function buildIndex(): SearchDoc[] {
     tags: [p.slug, ...(p.tags ?? [])], text: p.explanation.join(" "),
     code: `${p.code.html}\n${p.code.css}\n${p.code.js}`, link: { to: "/projetos", hash: p.slug },
   });
+  const seen = new Set<string>();
+  for (const e of dictionaryEntries) {
+    const id = dictionaryDocId(e.language, e.id);
+    if (seen.has(id)) continue;
+    seen.add(id);
+    docs.push({
+      id, group: "dicionario", title: e.name, summary: e.description,
+      tags: [...e.tags, e.language, e.category, e.kind, ...(e.obsolete ? ["obsoleto"] : [])],
+      text: [e.description, e.note ?? "", e.alternative ?? ""].join(" "),
+      code: `${e.syntax}\n${e.example}`,
+      link: { to: "/dicionario", hash: dictionaryDomId(e.language, e.id) },
+    });
+  }
   cache = docs;
   return docs;
 }
@@ -108,12 +135,17 @@ function makeSnippet(text: string, matched: string): string {
   return (start > 0 ? "…" : "") + flat.slice(start, start + 120) + (start + 120 < flat.length ? "…" : "");
 }
 
-export function search(q: string, limit = 30): SearchResult[] {
+/**
+ * Busca em lições, projetos e dicionário. Com `group`, considera só os
+ * documentos daquele grupo (usado pela página do Dicionário).
+ */
+export function search(q: string, limit = 30, group?: GroupId): SearchResult[] {
   const { terms, extra } = expandQuery(q);
   if (!terms.length) return [];
   const all = [...terms.map((t) => ({ t, boost: 1 })), ...extra.map((t) => ({ t, boost: 0.7 }))];
   const out: SearchResult[] = [];
   for (const d of buildIndex()) {
+    if (group && d.group !== group) continue;
     let score = 0, best = { s: 0, field: "", word: "", text: "" }, matchedTerms = 0;
     for (const { t, boost } of all) {
       let termBest = 0;
@@ -144,7 +176,12 @@ export function suggest(q: string, n = 5): string[] {
   const t = normalize(q).trim();
   if (!t) return [];
   const vocab = new Set<string>([...Object.keys(synonyms)]);
-  buildIndex().forEach((d) => { vocab.add(normalize(d.title)); d.tags.forEach((x) => vocab.add(normalize(x))); });
+  buildIndex().forEach((d) => {
+    const title = normalize(d.title);
+    // No dicionário, só nomes simples (ex.: "fieldset"); evita sugerir "input type=...".
+    if (d.group !== "dicionario" || /^[a-z0-9-]+$/.test(title)) vocab.add(title);
+    if (d.group !== "dicionario") d.tags.forEach((x) => vocab.add(normalize(x)));
+  });
   return [...vocab]
     .map((v) => ({ v, d: levenshtein(t, v) / Math.max(v.length, t.length) }))
     .sort((a, b) => a.d - b.d).slice(0, n).map((x) => x.v);

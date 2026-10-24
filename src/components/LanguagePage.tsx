@@ -1,6 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { lessonKey, type Language } from "@/data";
 import { useProgress } from "@/hooks/use-progress";
+import { GlossaryBlock } from "./GlossaryBlock";
 import { ProgressBar } from "./ProgressBar";
 
 export function LanguagePage({ lang }: { lang: Language }) {
@@ -51,6 +52,8 @@ export function LanguagePage({ lang }: { lang: Language }) {
           })}
         </ol>
       </section>
+
+      <GlossaryBlock lang={lang.id} />
     </div>
   );
 }

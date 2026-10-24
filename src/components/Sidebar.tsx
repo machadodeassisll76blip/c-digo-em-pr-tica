@@ -88,6 +88,10 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
         );
       })}
 
+      <Link to="/dicionario" onClick={onNavigate} className="nav-link font-semibold">
+        Dicionário
+      </Link>
+
       <Link to="/projetos" onClick={onNavigate} className="nav-link font-semibold">
         Projetos
       </Link>
